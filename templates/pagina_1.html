@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bienvenido</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    color: #f1f5f9;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    text-align: center;
+    padding: 80px 20px 40px;
+  }
+
+  header h1 {
+    font-size: 2.8rem;
+    margin-bottom: 15px;
+    color: #38bdf8;
+  }
+
+  header p {
+    font-size: 1.1rem;
+    color: #cbd5e1;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .cta {
+    text-align: center;
+    margin: 30px 0 60px;
+  }
+
+  .cta a {
+    background-color: #38bdf8;
+    color: #0f172a;
+    text-decoration: none;
+    padding: 14px 32px;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+
+  .cta a:hover {
+    background-color: #0ea5e9;
+  }
+
+  .features {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 25px;
+    padding: 0 20px 80px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background-color: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 30px;
+    width: 260px;
+    text-align: center;
+  }
+
+  .card h3 {
+    color: #38bdf8;
+    margin-bottom: 12px;
+    font-size: 1.2rem;
+  }
+
+  .card p {
+    color: #cbd5e1;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  footer {
+    text-align: center;
+    padding: 25px;
+    background-color: #0f172a;
+    color: #64748b;
+    font-size: 0.85rem;
+    border-top: 1px solid #1e293b;
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <h1>Bienvenido a Nuestro Sitio</h1>
+    <p>Esta es una landing page sencilla para mostrar información de forma clara y atractiva al usuario.</p>
+  </header>
+
+  <div class="cta">
+    <a href="#">Comenzar Ahora</a>
+  </div>
+
+  <section class="features">
+    <div class="card">
+      <h3>Rápido</h3>
+      <p>Diseño optimizado para cargar rápido y ofrecer una buena experiencia al usuario.</p>
+    </div>
+    <div class="card">
+      <h3>Responsivo</h3>
+      <p>Se adapta perfectamente a computadoras, tablets y dispositivos móviles.</p>
+    </div>
+    <div class="card">
+      <h3>Personalizable</h3>
+      <p>Fácil de modificar colores, textos y estructura según tus necesidades.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2026 Mi Empresa. Todos los derechos reservados.</p>
+  </footer>
+
+</body>
+</html>
