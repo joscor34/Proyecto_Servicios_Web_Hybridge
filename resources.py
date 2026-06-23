@@ -3,7 +3,7 @@
 from flask_restful import Resource
 
 
-from flask import render_template, make_response
+from flask import render_template, make_response, request
 
 
 class PrimerRecurso(Resource):
@@ -42,3 +42,24 @@ class PaginaPreguntas(Resource):
 
     # Le decimos a python que le muestre la vista como respuesta
     return make_response(sitio_web_renderizado)
+
+
+# Creamos el recurso al cual el usuario va a acceder
+class Login(Resource):
+
+  # El método que se ejecutará cuando el usuario acceda al recurso
+  def get(self):
+
+    # Renderizamos ese archivo | Convertir de código a una vista
+    sitio_web_renderizado = render_template('login.html')
+
+    # Le decimos a python que le muestre la vista como respuesta
+    return make_response(sitio_web_renderizado)
+
+  def post(self):
+
+    # Almacenaremos la información que el usuario nos envie
+    info_usuario = request.form.get('email')
+    password_usuario = request.form.get('password')
+
+    return {'Correo': info_usuario, 'Password': password_usuario}

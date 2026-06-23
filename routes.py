@@ -10,4 +10,5 @@ class AdministradorDeRutas:
     aplicacion.add_resource(NombreAleatorio, '/segundo')
     aplicacion.add_resource(PaginaInicio, '/')
     aplicacion.add_resource(PaginaPreguntas, '/faq')
+    aplicacion.add_resource(Login, '/login')
     # / -> Ruta Raíz: La primera página que verá el usuario al acceder a nuestra web
