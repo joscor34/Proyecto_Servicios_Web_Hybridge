@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Restaurar contraseña · AdminOS</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0f1117;
+    --surface:  #181c27;
+    --surface2: #1e2233;
+    --border:   #272d42;
+    --accent:   #6c63ff;
+    --accent2:  #00d4aa;
+    --danger:   #ff4d6d;
+    --warning:  #ffb347;
+    --text:     #e8eaf0;
+    --muted:    #7a82a0;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(108,99,255,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(108,99,255,.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  /* Glow blobs */
+  .blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    opacity: .35;
+  }
+  .blob-1 {
+    width: 420px; height: 420px;
+    background: var(--accent);
+    top: -120px; left: -100px;
+  }
+  .blob-2 {
+    width: 300px; height: 300px;
+    background: var(--accent2);
+    bottom: -80px; right: -60px;
+  }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 420px;
+    padding: 40px 36px;
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 24px 80px rgba(0,0,0,.45);
+  }
+
+  /* Brand */
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 32px;
+    text-decoration: none;
+  }
+  .brand-icon {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .brand-icon svg { width: 20px; height: 20px; }
+  .brand-name { font-weight: 700; font-size: 16px; color: var(--text); letter-spacing: -0.3px; }
+  .brand-sub  { font-size: 10px; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; }
+
+  /* Steps indicator */
+  .steps {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 28px;
+  }
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    position: relative;
+  }
+  .step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 13px;
+    left: calc(50% + 14px);
+    right: calc(-50% + 14px);
+    height: 1px;
+    background: var(--border);
+    transition: background .4s;
+  }
+  .step.done:not(:last-child)::after  { background: var(--accent); }
+  .step-dot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    color: var(--muted);
+    transition: border-color .3s, background .3s, color .3s;
+    font-family: 'JetBrains Mono', monospace;
+    position: relative; z-index: 1;
+  }
+  .step.active .step-dot  { border-color: var(--accent); background: var(--accent); color: #fff; }
+  .step.done   .step-dot  { border-color: var(--accent); background: rgba(108,99,255,.12); color: var(--accent); }
+  .step-label {
+    font-size: 10px; font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    white-space: nowrap;
+  }
+  .step.active .step-label { color: var(--text); }
+
+  /* Heading */
+  .heading { margin-bottom: 24px; }
+  .heading h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .heading p  { font-size: 13px; color: var(--muted); margin-top: 5px; line-height: 1.5; }
+  .heading p strong { color: var(--text); font-weight: 500; }
+
+  /* Form */
+  .field { margin-bottom: 18px; }
+  .field label {
+    display: block;
+    font-size: 12px; font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 7px;
+    letter-spacing: 0.2px;
+  }
+
+  .input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .input-icon {
+    position: absolute;
+    left: 13px;
+    display: flex; align-items: center;
+    color: var(--muted);
+    pointer-events: none;
+    transition: color .2s;
+  }
+  .input-icon svg { width: 15px; height: 15px; }
+
+  .input-wrap input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 40px 10px 38px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .input-wrap input::placeholder { color: var(--muted); }
+  .input-wrap input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(108,99,255,.15);
+  }
+  .input-wrap input:focus + .input-icon,
+  .input-wrap:focus-within .input-icon { color: var(--accent); }
+
+  .toggle-pw {
+    position: absolute;
+    right: 12px;
+    background: none; border: none;
+    cursor: pointer;
+    color: var(--muted);
+    display: flex; align-items: center;
+    transition: color .2s;
+    padding: 0;
+  }
+  .toggle-pw:hover { color: var(--text); }
+  .toggle-pw svg { width: 15px; height: 15px; }
+
+  /* Strength bar */
+  .strength-wrap { margin-top: 8px; }
+  .strength-bars {
+    display: flex; gap: 4px; margin-bottom: 5px;
+  }
+  .s-bar {
+    flex: 1; height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    transition: background .3s;
+  }
+  .s-bar.fill-weak    { background: var(--danger); }
+  .s-bar.fill-fair    { background: var(--warning); }
+  .s-bar.fill-good    { background: var(--accent); }
+  .s-bar.fill-strong  { background: var(--accent2); }
+  .strength-label { font-size: 11px; color: var(--muted); }
+  .strength-label span { font-weight: 600; }
+  .strength-label .weak   { color: var(--danger); }
+  .strength-label .fair   { color: var(--warning); }
+  .strength-label .good   { color: var(--accent); }
+  .strength-label .strong { color: var(--accent2); }
+
+  /* Rules */
+  .rules {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .rule {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--muted);
+    transition: color .2s;
+  }
+  .rule.ok { color: var(--accent2); }
+  .rule-icon { flex-shrink: 0; }
+  .rule-icon svg { width: 12px; height: 12px; }
+
+  /* Error hint */
+  .field-hint {
+    font-size: 11px;
+    margin-top: 6px;
+    display: flex; align-items: center; gap: 4px;
+    color: var(--danger);
+    display: none;
+  }
+  .field-hint svg { width: 12px; height: 12px; }
+  .field-hint.show { display: flex; }
+
+  /* CTA */
+  .btn-primary {
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 14px; font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    transition: opacity .2s, transform .1s;
+    margin-bottom: 16px;
+    letter-spacing: -0.1px;
+  }
+  .btn-primary:hover { opacity: .88; }
+  .btn-primary:active { transform: scale(.99); }
+  .btn-primary svg { width: 15px; height: 15px; }
+  .btn-primary.loading { pointer-events: none; opacity: .7; }
+
+  .spinner {
+    width: 15px; height: 15px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .6s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Back link */
+  .back-link {
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+  .back-link a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-flex; align-items: center; gap: 4px;
+    transition: opacity .15s;
+  }
+  .back-link a:hover { opacity: .8; }
+  .back-link a svg { width: 12px; height: 12px; }
+
+  /* Divider */
+  .divider {
+    display: flex; align-items: center; gap: 10px;
+    margin: 20px 0;
+    color: var(--muted); font-size: 11px;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1;
+    height: 1px; background: var(--border);
+  }
+
+  /* Success state */
+  .success-screen {
+    display: none;
+    text-align: center;
+    padding: 8px 0;
+  }
+  .success-screen.show { display: block; }
+  .success-icon {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: rgba(0,212,170,.1);
+    border: 1.5px solid var(--accent2);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+  }
+  .success-icon svg { width: 28px; height: 28px; color: var(--accent2); }
+  .success-screen h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 8px; }
+  .success-screen p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .success-screen .btn-primary { margin-top: 24px; }
+
+  .form-screen { display: block; }
+  .form-screen.hide { display: none; }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<div class="card">
+
+  <a href="#" class="brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+      </svg>
+    </div>
+    <div>
+      <div class="brand-name">AdminOS</div>
+      <div class="brand-sub">v2.1</div>
+    </div>
+  </a>
+
+  <!-- Steps -->
+  <div class="steps" id="steps">
+    <div class="step done" id="step1">
+      <div class="step-dot">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="step-label">Email</div>
+    </div>
+    <div class="step active" id="step2">
+      <div class="step-dot">2</div>
+      <div class="step-label">Nueva clave</div>
+    </div>
+    <div class="step" id="step3">
+      <div class="step-dot">3</div>
+      <div class="step-label">Listo</div>
+    </div>
+  </div>
+
+  <!-- Form screen -->
+  <div class="form-screen" id="formScreen">
+    <div class="heading">
+      <h1>Crea tu nueva contraseña</h1>
+      <p>Ingresaste como <strong>ana.ruiz@empresa.mx</strong>. Elige una contraseña segura que no hayas usado antes.</p>
+    </div>
+
+    <div class="field">
+      <label for="pw">Nueva contraseña</label>
+      <div class="input-wrap">
+        <div class="input-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <input type="password" id="pw" placeholder="Mínimo 8 caracteres" oninput="checkStrength(this.value)" autocomplete="new-password" />
+        <button class="toggle-pw" type="button" onclick="togglePw('pw', this)" tabindex="-1" aria-label="Mostrar contraseña">
+          <svg id="eye-pw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <div class="strength-wrap" id="strengthWrap" style="opacity:0;transition:opacity .3s">
+        <div class="strength-bars">
+          <div class="s-bar" id="sb1"></div>
+          <div class="s-bar" id="sb2"></div>
+          <div class="s-bar" id="sb3"></div>
+          <div class="s-bar" id="sb4"></div>
+        </div>
+        <div class="strength-label">Seguridad: <span id="strengthText">—</span></div>
+      </div>
+    </div>
+
+    <div class="rules" id="rules">
+      <div class="rule" id="r-len">
+        <span class="rule-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span>
+        Al menos 8 caracteres
+      </div>
+      <div class="rule" id="r-upper">
+        <span class="rule-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span>
+        Una letra mayúscula
+      </div>
+      <div class="rule" id="r-num">
+        <span class="rule-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span>
+        Un número
+      </div>
+      <div class="rule" id="r-special">
+        <span class="rule-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span>
+        Un carácter especial (!@#$…)
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="pw2">Confirmar contraseña</label>
+      <div class="input-wrap">
+        <div class="input-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </div>
+        <input type="password" id="pw2" placeholder="Repite la contraseña" oninput="checkMatch()" autocomplete="new-password" />
+        <button class="toggle-pw" type="button" onclick="togglePw('pw2', this)" tabindex="-1" aria-label="Mostrar contraseña">
+          <svg id="eye-pw2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <div class="field-hint" id="matchHint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        Las contraseñas no coinciden
+      </div>
+    </div>
+
+    <button class="btn-primary" id="submitBtn" onclick="handleSubmit()" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Actualizar contraseña
+    </button>
+
+    <div class="back-link">
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Volver al inicio de sesión
+      </a>
+    </div>
+  </div>
+
+  <!-- Success screen -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h2>¡Contraseña actualizada!</h2>
+    <p>Tu acceso ha sido restablecido.<br>Puedes iniciar sesión con tu nueva contraseña.</p>
+    <button class="btn-primary" type="button" onclick="window.location='#'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      Ir al inicio de sesión
+    </button>
+  </div>
+
+</div>
+
+<script>
+  const CHECK_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><polyline points="20 6 9 17 4 12"/></svg>`;
+  const INFO_SVG  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+
+  const rules = {
+    'r-len':     v => v.length >= 8,
+    'r-upper':   v => /[A-Z]/.test(v),
+    'r-num':     v => /[0-9]/.test(v),
+    'r-special': v => /[^A-Za-z0-9]/.test(v),
+  };
+
+  function checkStrength(val) {
+    const wrap = document.getElementById('strengthWrap');
+    wrap.style.opacity = val.length ? '1' : '0';
+
+    let score = 0;
+    for (const [id, fn] of Object.entries(rules)) {
+      const el = document.getElementById(id);
+      const ok = fn(val);
+      if (ok) { el.classList.add('ok'); el.querySelector('.rule-icon').innerHTML = CHECK_SVG; score++; }
+      else     { el.classList.remove('ok'); el.querySelector('.rule-icon').innerHTML = INFO_SVG; }
+    }
+
+    const bars = ['sb1','sb2','sb3','sb4'];
+    const levels = [
+      { cls: 'fill-weak',   label: '<span class="weak">Débil</span>' },
+      { cls: 'fill-fair',   label: '<span class="fair">Regular</span>' },
+      { cls: 'fill-good',   label: '<span class="good">Buena</span>' },
+      { cls: 'fill-strong', label: '<span class="strong">Fuerte</span>' },
+    ];
+
+    bars.forEach((id, i) => {
+      const b = document.getElementById(id);
+      b.className = 's-bar';
+      if (i < score) b.classList.add(levels[score - 1].cls);
+    });
+
+    document.getElementById('strengthText').innerHTML = score === 0 ? '—' : levels[score - 1].label;
+    checkMatch();
+  }
+
+  function checkMatch() {
+    const pw1 = document.getElementById('pw').value;
+    const pw2 = document.getElementById('pw2').value;
+    const hint = document.getElementById('matchHint');
+    if (pw2.length === 0) { hint.classList.remove('show'); return; }
+    pw1 === pw2 ? hint.classList.remove('show') : hint.classList.add('show');
+  }
+
+  function togglePw(id, btn) {
+    const input = document.getElementById(id);
+    const eyeId = 'eye-' + id;
+    const isHidden = input.type === 'password';
+    input.type = isHidden ? 'text' : 'password';
+    document.getElementById(eyeId).innerHTML = isHidden
+      ? `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>`
+      : `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+  }
+
+  function handleSubmit() {
+    const pw1 = document.getElementById('pw').value;
+    const pw2 = document.getElementById('pw2').value;
+
+    const allRulesOk = Object.values(rules).every(fn => fn(pw1));
+    if (!allRulesOk || pw1 !== pw2 || pw2.length === 0) {
+      document.getElementById('matchHint').classList.add('show');
+      document.getElementById('pw').focus();
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.classList.add('loading');
+    btn.innerHTML = `<div class="spinner"></div> Guardando…`;
+
+    setTimeout(() => {
+      // Mark step 2 done, step 3 active
+      document.getElementById('step2').classList.remove('active');
+      document.getElementById('step2').classList.add('done');
+      document.getElementById('step2').querySelector('.step-dot').innerHTML = CHECK_SVG.replace('width="12" height="12"','');
+      document.getElementById('step3').classList.add('active');
+
+      document.getElementById('formScreen').classList.add('hide');
+      document.getElementById('successScreen').classList.add('show');
+    }, 1600);
+  }
+</script>
+</body>
+</html>

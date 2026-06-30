@@ -3,7 +3,7 @@
 from flask_restful import Resource
 
 
-from flask import render_template, make_response, request
+from flask import render_template, make_response, request, redirect
 
 
 class PrimerRecurso(Resource):
@@ -62,4 +62,29 @@ class Login(Resource):
     info_usuario = request.form.get('email')
     password_usuario = request.form.get('password')
 
-    return {'Correo': info_usuario, 'Password': password_usuario}
+    if info_usuario == 'admin@correo.com' and password_usuario == 'admin123':
+
+      return redirect('/admin')
+
+    else:
+
+      return 'Contraseña o correo incorrectos :('
+
+
+# Página de administrador
+class PaginaAdmin(Resource):
+
+  def get(self):
+
+    pagina_renderizada = render_template('admin.html')
+
+    return make_response(pagina_renderizada)
+
+
+class PaginaRecuperarPassword(Resource):
+
+  def get(self):
+
+    pagina_renderizada = render_template('recoverpass.html')
+
+    return make_response(pagina_renderizada)
